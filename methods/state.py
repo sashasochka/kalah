@@ -274,6 +274,17 @@ class KalahState(object):
         
         Args:
             player: active player's number (0 or 1)
+            
+        Returns:
+            A list of possible moves and their results in format of list of 
+            such dictionary:
+            {'state':new_state, 'result':result, 'hole':[hole], 'player':new_player}
+            Where:
+                @new_state is a neighbor state
+                @result is a result of the move that lead to this neighbot
+                @hole is a number of hole from which we should pickup the 
+                stones to make this particular move
+                @new_player the number of a new player after that move
         """
         neighbors = self.get_neighbors(player)
         while True:

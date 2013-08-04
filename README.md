@@ -36,13 +36,32 @@ Tips of how to create your own gameplay method.
     create a method class that inherited from the Method class 
     (methods/method.py). You should place a new method's file to the methods
     folder. When you finished creating your method it will be accessible in the 
-    Kalah options dialog window. For more details please refer a method template 
-    in methods/method_template.py file and check examples in 
+    Kalah options dialog window. For more details please check examples in 
     methods/random.py and methods/minmax.py
+
+Tips of how to create your own minimax heuristic method.
+
+    Just take methods/minmax.py file and carefully read the comments and 
+    explanations. You will find there that you should simply rewrite only
+    two functions (_utility and _terminal_test) to create your own
+    minimax heuristic method.
     
 Project structure
 
-    
+    images - images folder
+    methods - package for all gameplay methods
+    methods/__init__.py - package init file (does nothing)
+    methods/method.py - module with most abstract method class called Method
+    methods/minmax.py - implementation of minimax heuristic algorithm
+    methods/random.py - implementation of random dummy algorithm
+    methods/state.py - module with State class for Kalah game; check it - there
+                        are all Kalah's gaming rules are implemented (loof up
+                        to make_move function)
+    main.py - main project module; run it to work with Kalah Gameboard
+    main_window.py - main window module of the Kalah Gameboard
+    main_window.ui - QtDesigner file for the main window
+    options_dialog.py - dialog window for main options of the Kalah Gameboard
+    options_dialog.ui - dialog window for main options QtDesigner
     
 License agreement
 

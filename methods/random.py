@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from methods.method import Method
 from numpy.random import randint
-from time import sleep
 
 class RandomMethod(Method):
     """Class contains logic of the random player.
@@ -45,7 +44,6 @@ class RandomMethod(Method):
             Player's hole number which defines a player's next move
         """
         super(RandomMethod, self).make_move(state)
-        sleep(0.2)
         holes_num = state.holes_num()
         my_holes = state.player_holes(self._player)
         candidates = []

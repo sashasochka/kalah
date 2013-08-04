@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Contains state class for the Kalah
+"""Contains state class for the Kalah game
 
 @author: Oleksii Molchanovskyi
 @organization: Kyiv Polytechnic Institute
@@ -21,22 +21,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from copy import deepcopy
 
+#
+# Constans that are used to return turn results up to the calling program
+#
+
+# Current move didn't finished
 MoveNotEnds = 0
+# Current move is finished
 MoveEnds = 1
+# Current move is finished with the last stone in a player's Kalah
 MoveEndsInPlayersKalah = 2
+# Current move is finished with the last stone in a player's empty pit
 MoveEndsInPlayersEmptyHole = 3
+# Current move is wrong (we've got some error)
 WrongMove = 4
 
 class KalahStateList(object):
+    """Class that stores a list of the Kalah states
+    
+    Purpose of this class is to provide the main program with a list of 
+    interimediate states for the moves' animation
+    
+    Attributes:
+        _list: a list of states
+    """
     _list = []
     def __init__(self):
+        """Inits an empty list"""
         self._list = []
     def add_state(self, state, active_player, active_hole=-1, active_kalah=False):
+        """Adds a state to list"""
         self._list.append({'state':state.copy(), 'player':active_player, 'hole':active_hole, 'kalah':active_kalah})
     def get_list(self):
+        """Returns a reference to list""" 
         return self._list
 
 class KalahState(object):
+    """Kalah game state
+    
+    Attributes:
+        _holes_num: amount of holes or pits (default: 6)
+        _holes: two lists of contents of each player's holes
+        _kalahs: amount of stones in each player's kalah
+        last_move: an object of KalahStateList that stores a sequence of 
+            interimediate states for the moves' animation
+        last_move_result: last made move (refer to constants' lists on the top 
+            of file)
+    """
     _holes_num = 6
     _holes = [[], []]
     _kalahs = [0, 0]
@@ -44,6 +75,12 @@ class KalahState(object):
     last_move_result = MoveEnds
     
     def __init__(self, stones_per_hole, holes_num=6):
+        """Inits a board
+        
+        Args:
+            stones_per_hole: number of stones in each hole on game startup
+            holes_num: number of hole (standard is 6)
+        """
         self._holes_num = holes_num
         self._holes = [[], []]
         self._kalahs = [0, 0]
@@ -52,18 +89,41 @@ class KalahState(object):
             self._holes[1].append(stones_per_hole)
             
     def holes_num(self):
+        """Returns number of holes"""
         return self._holes_num
     
     def player_holes(self, player):
+        """Returns a list of number of stones in player's holes"""
         return self._holes[player]
         
     def player_kalah(self, player):
+        """Returns amount of stones in player's kalah"""
         return self._kalahs[player]
         
     def player_points(self, player):
+        """Returns amount of stones in player's kalah"""
         return self._kalahs[player]
             
     def move(self, player, hole_num):
+        """"Makes a move
+        
+        During this function a current player's stones are taken from hole with
+        hole_num number and are distributed corresponding to game's rules.
+        Please refer main.py for game's rules.
+        
+        If there are several consequent moves of one player then all that 
+        moves are combined in one action. 
+        
+        When this function is finished there will be stored following data:
+            last_move_result: result of the last move; see the list of 
+                constants on the top of the file
+            last_moves: a list of consequent steps (when stones are put one
+                by one to corresponding pits)
+        
+        Args:
+            player: current player number (0 or 1)
+            hole_num: number of hole or pit from which the move begins
+        """
         self.last_moves = None
         last_moves = KalahStateList()
         
@@ -135,15 +195,32 @@ class KalahState(object):
         return self.last_move_result
         
     def get_last_moves(self):
+        """Returns a list of last move consequent steps"""
         return self.last_moves
     
     def is_finished(self, player):
+        """Checks if the game is finished
+        
+        Args:
+            player: current player number (0 or 1)
+            
+        Returns: 
+            True/False is there game finished now (during player's turn, 
+            i.e. when player has his/her turn but there are no any stones 
+            on his/her board's side)
+        """
         for hole in self._holes[player]:
             if hole:
                 return False
         return True
         
     def end_game(self):
+        """Ends the game and moves all onboard stones to corresponding 
+        player kalah
+        
+        Returns:
+            An array of result scores for each player
+        """
         for player in [0,1]:
             for hole in range(self._holes_num):
                 self._kalahs[player] += self._holes[player][hole]
@@ -151,21 +228,33 @@ class KalahState(object):
         return self._kalahs
         
     def to_string(self):
+        """Copies the state to string and returns it"""
         return "(" + str(self._holes[0]) + ", " + str(self._kalahs[0]) + ") (" + str(self._holes[1]) + ", " + str(self._kalahs[1]) + ")"
         
     def __print__(self):
+        """Prints the state in a text format"""
         print self.to_string()
         
     def copy(self):
+        """Returns a copy of the state"""
         last_moves, self.last_moves = self.last_moves, None
         state = deepcopy(self)
         self.last_moves = last_moves
         return state
         
     def is_temporary(self):
+        """Not used"""
         return self._temporary
         
     def get_neighbors(self, player):
+        """Returns a neighbor state of this state for the player's move
+        
+        This function makes only one move. This function does not take into
+        account the possibilities of the extra moves
+        
+        Args:
+            player: active player's number (0 or 1)
+        """
         neighbors = []
         for hole in range(self._holes_num):
             if self._holes[player][hole]:
@@ -179,6 +268,13 @@ class KalahState(object):
         return neighbors
         
     def get_all_neighbors(self, player):
+        """Returns a neighbor state of this state for the player's move
+        
+        This function makes all possible moves including an extra moves.
+        
+        Args:
+            player: active player's number (0 or 1)
+        """
         neighbors = self.get_neighbors(player)
         while True:
             for i in range(len(neighbors)):

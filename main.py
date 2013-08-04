@@ -54,6 +54,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from main_window import Ui_kalah_window
+from options_dialog import Ui_kalah_options
+
+import methods.state as st
+
 import sys
 import inspect
 import time
@@ -63,14 +68,10 @@ from importlib import import_module
 from multiprocessing import Process, Pipe
 from PyQt4 import QtCore, QtGui
 
-from main_window import Ui_kalah_window
-from options_dialog import Ui_kalah_options
-
-import methods.state as st
-
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class AsyncRunProcess(Process):
+    """Class that implements methods running in a separate process"""
     def __init__(self, obj, state, conn):
         Process.__init__(self)
         self.obj = obj
@@ -83,6 +84,7 @@ class AsyncRunProcess(Process):
         self.conn.send(("finish",result))
         
 class AsyncRun(QtCore.QObject):
+    """Class that runs method instance for a problem asynchronously"""
     stop = False
     def __init__(self, obj, state):
         QtCore.QObject.__init__(self)
@@ -110,6 +112,7 @@ class AsyncRun(QtCore.QObject):
         self.stop = True
 
 class OptionsDlg(QtGui.QDialog):
+    """Envelope-class for Kalah game options dialog"""
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
         self.ui = Ui_kalah_options()
@@ -131,6 +134,7 @@ class OptionsDlg(QtGui.QDialog):
         self.ui.ai_level_label_2.setEnabled(index>0)
 
 class BoardScene(QtGui.QGraphicsScene):
+    """Class that displays Kalah board"""
     state = None
     holes_num = 0
     holes = [[], []]
@@ -182,134 +186,6 @@ class BoardScene(QtGui.QGraphicsScene):
         if redraw:
             self.draw()
     
-#    def draw_old(self):
-#        if self.redraw_geometry:
-#            block_width = self.width/(self.holes_num+2)
-#            block_height = self.height/2
-#        
-#            for player in [0,1]:
-#                for hole in range(self.holes_num):
-#                    if player==1:
-#                        hole_real_num = self.holes_num-hole-1
-#                    else:
-#                        hole_real_num = hole
-#                    hole_rect = QtCore.QRectF((hole+1)*block_width + block_width*0.05, (1-player)*block_height + block_height*0.05, block_width*0.9, block_height*0.9)
-#                    hole = self.addEllipse(hole_rect, self.hole_normal_pen, self.hole_normal_brush)
-#                    hole.setAcceptHoverEvents(True)
-#                    hole.setAcceptedMouseButtons(QtCore.Qt.LeftButton)
-#                    hole.setData(0, player)
-#                    hole.setData(1, hole_real_num)
-#                    hole.setData(2, 0)
-#                    
-#                    hole_text = self.addSimpleText(str(self.state.player_holes(player)[hole_real_num]))
-##                    hole_text.setParentItem(hole)
-#                    hole_text.setPos(hole_rect.center().x()-hole_text.boundingRect().width()/2, hole_rect.center().y()-hole_text.boundingRect().height()/2)
-#                    hole_text.setAcceptedMouseButtons(QtCore.Qt.NoButton)
-#                    
-#                    self.holes[player][hole_real_num]['item'] = hole
-#                    self.holes[player][hole_real_num]['text'] = hole_text
-#                
-#                if player==0:
-#                    kalah_rect = QtCore.QRectF((self.holes_num+1)*block_width + block_width*0.05, block_height*0.1, block_width*0.9, block_height*1.8)
-#                else:
-#                    kalah_rect = QtCore.QRectF(block_width*0.05, block_height*0.1, block_width*0.9, block_height*1.8)
-#                kalah = self.addEllipse(kalah_rect, self.kalah_normal_pen, self.kalah_normal_brush)
-#                kalah.setAcceptHoverEvents(False)
-#                kalah.setAcceptedMouseButtons(QtCore.Qt.NoButton)
-#                kalah.setData(0, player)
-#                kalah.setData(1, -1)
-#                kalah.setData(2, 1)
-#                
-#                kalah_text = self.addSimpleText(str(self.state.player_kalah(player)))
-##                kalah_text.setParentItem(kalah)
-#                kalah_text.setPos(kalah_rect.center().x()-kalah_text.boundingRect().width()/2, kalah_rect.center().y()-kalah_text.boundingRect().height()/2)
-#                kalah_text.setAcceptedMouseButtons(QtCore.Qt.NoButton)
-#                
-#                self.kalahs[player]['item'] = kalah
-#                self.kalahs[player]['text'] = kalah_text
-#                
-#                self.redraw_geometry = False
-#                
-#        for player in [0,1]:
-#            for hole in range(self.holes_num):
-#                self.holes[player][hole]['text'].setText(str(self.state.player_holes(player)[hole]))
-#                self.holes[player][hole]['text'].update()
-#            self.kalahs[player]['text'].setText(str(self.state.player_kalah(player)))
-#            self.kalahs[player]['text'].update()
-#    
-        
-#    def _draw_hole(self, player, hole, number, prev_number):
-#        if number==prev_number:
-#            return
-#        if number<prev_number:
-#            for i in range(prev_number-number):
-#                self.holes[player][hole]['item_coords'].pop()
-#                item = self.holes[player][hole]['items'].pop()
-#                self.removeItem(item)
-#        else:
-#            rect = self.holes[player][hole]['rect']
-#            print rect.left(), rect.top(), rect.width(), rect.height()
-#            cx, cy = int(rect.width()/2), int(rect.height()/2)
-#            pic_width = self.stone_pic.width()
-#            max_r = int(cx - pic_width/2 + 1)
-#            delta = 1.
-#            i = prev_number
-#            while i<number:
-#                try_num = 0
-#                while True:
-#                    r = randint(max_r)
-#                    x = randint(-r, r+1) + cx
-#                    y = int(sqrt(r**2 - (x-cx)**2)) * (randint(2)==1 and 1 or -1) + cy
-#                    nearby, min_d = 0, float('inf')
-#                    for c in self.holes[player][hole]['item_coords']:
-#                        d = (x-c[0])**2 + (y-c[1])**2 
-#                        if d<=(pic_width/delta)**2:
-#                            nearby += 1
-#                        if min_d > d:
-#                            min_d = d
-#                    print player, hole, i, x, y, nearby, delta
-#                    if nearby==0:
-#                        break
-#                    elif nearby<i/2 and min_d>(pic_width/(delta*2))**2:
-#                        break
-#                    elif nearby==i and i>=4:
-#                        delta = delta*2
-#                    try_num += 1
-#                    if try_num>10:
-#                        break
-#                self.holes[player][hole]['item_coords'].append([x,y])
-#                item = self.addPixmap(self.stone_pic)
-#                item.setOffset(rect.left() + x - pic_width/2, rect.top() + y - pic_width/2)
-#                item.setData(0, player)
-#                item.setData(1, hole)
-#                item.setData(2, 0)
-#                self.holes[player][hole]['items'].append(item)
-#                i += 1
-#    def _draw_hole(self, player, hole, number, prev_number):
-#        if number==prev_number:
-#            return
-#        if number<prev_number:
-#            for i in range(prev_number-number):
-#                self.holes[player][hole]['item_coords'].pop()
-#                item = self.holes[player][hole]['items'].pop()
-#                self.removeItem(item)
-#        else:
-#            rect = self.holes[player][hole]['rect']
-#            cx, cy = int(rect.width()/2), int(rect.height()/2)
-#            pic_width = self.stone_pic.width()
-#            max_r = cx - pic_width
-#            d_alpha = 2*math.pi / number
-#            for i in range(prev_number, number):
-#                alpha = d_alpha*(i + random())
-#                r = randint(max_r) + max_r
-#                x, y = cx + int(math.cos(alpha) * r), cy + int(math.sin(alpha) * r)
-#                self.holes[player][hole]['item_coords'].append([x,y])
-#                item = self.addPixmap(self.stone_pic)
-#                item.setOffset(rect.left() + x - pic_width/2, rect.top() + y - pic_width/2)
-#                item.setData(0, player)
-#                item.setData(1, hole)
-#                item.setData(2, 0)
-#                self.holes[player][hole]['items'].append(item)
     def _draw_hole(self, player, hole, number, prev_number):
         rect = self.holes[player][hole]['rect']
         if self.holes[player][hole]['items']:
@@ -328,49 +204,6 @@ class BoardScene(QtGui.QGraphicsScene):
         item.setData(2, 0)
         self.holes[player][hole]['items'].append(item)
                 
-#    def _draw_kalah(self, player, number, prev_number):
-#        if number==prev_number:
-#            return
-#        if number<prev_number:
-#            for i in range(prev_number-number):
-#                self.kalahs[player]['item_coords'].pop()
-#                item = self.holes[player]['items'].pop()
-#                self.removeItem(item)
-#        else:
-#            rect = self.kalahs[player]['rect']
-#            coef = number>10 and 1 or 2
-#            cx, cy = rect.width()/coef, rect.height()/coef
-#            pic_width = self.stone_pic.width()/2
-#            delta = 1.
-#            i = prev_number
-#            while i<number:
-#                try_num = 0
-#                while True:
-#                    x, y = randint(cx), randint(cy)
-#                    nearby, min_d = 0, float('inf')
-#                    for c in self.kalahs[player]['item_coords']:
-#                        d = (x-c[0])**2 + (y-c[1])**2 
-#                        if d<=(pic_width/delta)**2:
-#                            nearby += 1
-#                        if min_d > d:
-#                            min_d = d
-#                    if nearby==0:
-#                        break
-#                    elif nearby<i/2 and min_d>(pic_width/(delta*2))**2:
-#                        break
-#                    elif nearby==i and i>=4:
-#                        delta = delta*2
-#                    try_num += 1
-#                    if try_num>10:
-#                        break
-#                self.kalahs[player]['item_coords'].append([x,y])
-#                item = self.addPixmap(self.stone_pic)
-#                item.setData(0, player)
-#                item.setData(1, -1)
-#                item.setData(2, 1)
-#                item.setOffset(rect.left() + x, rect.top() + y)
-#                self.kalahs[player]['items'].append(item)
-#                i += 1
     def _draw_kalah(self, player, number, prev_number):
         if number==prev_number:
             return

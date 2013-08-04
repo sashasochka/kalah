@@ -24,16 +24,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from PyQt4.QtCore import QElapsedTimer
+
 class Method(object):
     """Base class for gameplay methods
     
     Attributes:
         _name: title of the method
         _short_name: shorter title 
-        _run_time_limit: amount of seconds that method can run
+        _run_time_limit: amount of seconds that method can run; if the method
+            will run out of time then its player will loose the game
         _player: number of player which uses this method (0 or 1)
         _disabled: if True then method will not be active in GUI
         _ai_level: level of the AI experience (from 1 to 5)
+        _running_timer: QElapsedTimer object that is used to check if the 
+            method has run out of the time limit
     """
     
     _name = "Unknown"
@@ -42,16 +47,19 @@ class Method(object):
     _player = 1
     _disabled = False
     _ai_level = 1
+    _running_timer = None
     
-    def __init__(self, player_num, ai_level=1):
+    def __init__(self, player_num, ai_level=1, run_time_limit=60):
         """Inits a method with player number and AI level
         
         Args:
             player_num: player's number (0 or 1)
             ai_level: player's AI experience level (from 1 to 5)
+            run_time_limit: running time limit
         """
         self._player = player_num
         self._ai_level = ai_level
+        self._run_time_limit = run_time_limit
     
     def name(self):
         """Returns method's name"""
@@ -73,6 +81,22 @@ class Method(object):
         """Sets a player number (0 or 1)"""
         self._player = player_num
         
+    def is_time_expired(self, time_limit=-1):
+        """Checks if the method is running out of time limit
+        
+        It uses QElapsedTimer object (self._running_timer) to check the
+        elapsed time. Timer starts in self.make_move function
+        
+        Args:
+            time_limit: in seconds
+        
+        Returns:
+            True/False whether the method is running out of time limit
+        """
+        if time_limit<0:
+            time_limit = self._run_time_limit
+        return self._running_timer.hasExpired(time_limit*1000)
+        
     def make_move(self, state):
         """Makes a decision of the player's next move (abstract)
         
@@ -82,4 +106,6 @@ class Method(object):
         Returns:
             Player's hole number which defines a player's next move
         """
+        self._running_timer = QElapsedTimer()
+        self._running_timer.start()
         return -1

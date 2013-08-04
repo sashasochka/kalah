@@ -28,6 +28,8 @@ if __name__ == "__main__":
 else:
     from methods.method import Method
     
+import time
+    
 class MinMaxMethod(Method):
     """Class with MinMax method for playing Kalah
     
@@ -48,13 +50,16 @@ class MinMaxMethod(Method):
     _name = "Min-max"
     _short_name = "Min-max"
     
-    def __init__(self, player_num, ai_level=1):
+    def __init__(self, player_num, ai_level=1, run_time_limit=60):
         """Inits MinMaxMethod object
         
         Args:
             Please refer Method class description for details
         """
-        super(MinMaxMethod, self).__init__(player_num, ai_level)
+        # 
+        # We're using 90% of maximum run time limit to work
+        #
+        super(MinMaxMethod, self).__init__(player_num, ai_level, run_time_limit*0.9)
         self._ai_level = max(1, min(ai_level, 5))
     
     def _other_player(self):
@@ -72,7 +77,7 @@ class MinMaxMethod(Method):
             True/False: if not is finished or not
         """
 #        print player, state.to_string(), depth, self._ai_level
-        if depth>=self._ai_level or state.is_finished(player):
+        if depth>=self._ai_level or state.is_finished(player) or self.is_time_expired():
             return True
         return False
     
@@ -147,9 +152,13 @@ class MinMaxMethod(Method):
         Returns:
             Player's hole number which defines a player's next move
         """
+        super(MinMaxMethod, self).make_move(state)
+        self.start_time = time.time()
         print "Input state:", state.to_string()
         neighbors = state.get_all_neighbors(self._player)
         best_value, best_state = -float('inf'), None
+        if len(neighbors)==1:
+            return neighbors[0]['hole'][0]
         for new_state in neighbors:
             value = self._min_value(new_state['state'])
             if best_value < value :
@@ -167,6 +176,6 @@ if __name__ == "__main__":
     from state import KalahState
     state = KalahState(0)
     state._kalahs = [6,4]
-    state._holes = [[0, 4, 8, 7, 2, 4], [0, 0, 0, 0, 0, 1]]
+    state._holes = [[1, 4, 0, 0, 0, 0], [0, 0, 0, 0, 3, 1]]
     method = MinMaxMethod(1, 1)
     print method.make_move(state)

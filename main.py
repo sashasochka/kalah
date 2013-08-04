@@ -797,7 +797,8 @@ class MainWindow(QtGui.QMainWindow):
         del self.ai_run_object
         self.ai_run_object = None
         
-        self.make_move(self.active_player, hole)
+        if self.on_game:
+            self.make_move(self.active_player, hole)
         
 if __name__ == "__main__":
     sys.path.append(join(sys.path[0], 'methods'))

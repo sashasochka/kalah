@@ -44,6 +44,7 @@ class RandomMethod(Method):
         Returns:
             Player's hole number which defines a player's next move
         """
+        super(RandomMethod, self).make_move(state)
         sleep(0.2)
         holes_num = state.holes_num()
         my_holes = state.player_holes(self._player)

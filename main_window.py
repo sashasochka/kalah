@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Sat Aug 03 23:18:10 2013
-#      by: PyQt4 UI code generator 4.9.5
+# Created: Tue Aug  6 00:55:04 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,7 +23,7 @@ class Ui_kalah_window(object):
         self.board.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.board.setObjectName(_fromUtf8("board"))
         self.active_player = QtGui.QLabel(kalah_window)
-        self.active_player.setGeometry(QtCore.QRect(30, 13, 361, 16))
+        self.active_player.setGeometry(QtCore.QRect(30, 13, 400, 16))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)

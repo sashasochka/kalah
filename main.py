@@ -363,7 +363,7 @@ class BoardScene(QtGui.QGraphicsScene):
 
 class MainWindow(QtGui.QMainWindow):
 
-    options = {"stones":5, "player_1":"human", "player_2":"human",
+    options = {"stones":5, "player_1":"Version0Method", "player_2":"Version1Method",
                "ai_level_1":3, "ai_level_2":3,
                "timer_on":False, "time_per_move":60,
                "show_moves":False,

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """Run script for Kalah Gameboard.
 
 Kalah Gameboard is a software that implements an ancient board game called

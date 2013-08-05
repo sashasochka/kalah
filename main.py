@@ -26,6 +26,7 @@ class AsyncRunProcess(Process):
     def run(self):
         result = self.obj.make_move(self.state)
         print result
+        sys.stdout.flush()
         self.conn.send(("finish",result))
 
 class AsyncRun(QtCore.QObject):
@@ -40,6 +41,7 @@ class AsyncRun(QtCore.QObject):
         parent_conn, child_conn = Pipe()
         self.process = AsyncRunProcess(self.obj, self.state, child_conn)
         self.process.start()
+        sys.stdout.flush()
         while not self.stop and not parent_conn.poll():
             time.sleep(0.1)
         if self.stop:
@@ -51,6 +53,7 @@ class AsyncRun(QtCore.QObject):
             self.process.join()
             self.emit(QtCore.SIGNAL("success"), result)
         self.emit(QtCore.SIGNAL("finished"))
+
     def stopWork(self):
 #        print "Calculation terminated"
         time.sleep(2)
@@ -458,6 +461,7 @@ class MainWindow(QtGui.QMainWindow):
         if dialog.exec_():
             self.options["stones"] = dialog.ui.stones.value()
             self.options["player_1"] = dialog.ui.player_1.itemData(dialog.ui.player_1.currentIndex()).toString().__str__()
+            print self.options['player_1']
             self.options["player_2"] = dialog.ui.player_2.itemData(dialog.ui.player_2.currentIndex()).toString().__str__()
             self.options["ai_level_1"] = dialog.ui.ai_level_1.value()
             self.options["ai_level_2"] = dialog.ui.ai_level_2.value()
@@ -566,7 +570,8 @@ class MainWindow(QtGui.QMainWindow):
             msg += " Score %d:%d" % (score[0],score[1])
             self.ui.active_player.setText(msg)
             self.display_board()
-
+            print msg
+            sys.stdout.flush()
             self.moves = []
             self.ui.undo.setEnabled(False)
 

@@ -1,0 +1,12 @@
+#!/bin/bash
+logfile=$(date +%s)
+echo 'Logfile:' $logfile
+python -u main.py | unbuffer -p \
+    grep -E -e thinks -e Input -e '^[0-9]$' -e over | unbuffer -p \
+    sed -e 's/thinks\.\.\./turn:/' \
+        -e 's/Game over/------------\n/' | unbuffer -p \
+        grep -vE "^$" > logs/$logfile.txt &
+
+cd logs
+./showlog
+cd -

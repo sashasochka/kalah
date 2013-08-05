@@ -7,31 +7,31 @@ Kalah or Mancala.
 This is a main module for the Kalah Gameboard.
 
 From Wikipedia (en.wikipedia.org/wiki/Kalah):
-    
-    The game requires a Kalah board and 36 - 72 seeds or stones. The board has 
-    six small pits, called houses, on each side; and a big pit, called a Kalah 
-    or store, at each end. 
+
+    The game requires a Kalah board and 36 - 72 seeds or stones. The board has
+    six small pits, called houses, on each side; and a big pit, called a Kalah
+    or store, at each end.
     The object of the game is to capture more seeds than one's opponent.
-    
+
     Rules.
     1. At the beginning of the game, three seeds are placed in each house.
-    2. Each player controls the six houses and their seeds on his/her side of 
-    the board. His/her score is the number of seeds in the store to his/her 
+    2. Each player controls the six houses and their seeds on his/her side of
+    the board. His/her score is the number of seeds in the store to his/her
     right.
-    3. Players take turns sowing their seeds. On a turn, the player removes 
-    all seeds from one of the houses under his/her control. Moving 
-    counter-clockwise, the player drops one seed in each house in turn, 
+    3. Players take turns sowing their seeds. On a turn, the player removes
+    all seeds from one of the houses under his/her control. Moving
+    counter-clockwise, the player drops one seed in each house in turn,
     including the player's own store but not his/her opponent's.
-    4. If the last sown seed lands in the player's store, the player gets 
-    an additional move. There is no limit on the number of moves a player can 
+    4. If the last sown seed lands in the player's store, the player gets
+    an additional move. There is no limit on the number of moves a player can
     make in his/her turn.
-    5. If the last sown seed lands in an empty house owned by the player, and 
-    the opposite house contains seeds, both the last seed and the opposite 
+    5. If the last sown seed lands in an empty house owned by the player, and
+    the opposite house contains seeds, both the last seed and the opposite
     seeds are captured and placed into the player's store.
-    6. When one player no longer has any seeds in any of his/her houses, 
-    the game ends. The other player moves all remaining seeds to his/her store, 
+    6. When one player no longer has any seeds in any of his/her houses,
+    the game ends. The other player moves all remaining seeds to his/her store,
     and the player with the most seeds in his/her store wins.
-    
+
     The game may vary with amount of initial seeds: 3, 4, 5, 6. The more seeds
     the more harder to play.
 
@@ -82,7 +82,7 @@ class AsyncRunProcess(Process):
         result = self.obj.make_move(self.state)
         print result
         self.conn.send(("finish",result))
-        
+
 class AsyncRun(QtCore.QObject):
     """Class that runs method instance for a problem asynchronously"""
     stop = False
@@ -120,15 +120,15 @@ class OptionsDlg(QtGui.QDialog):
         self.ui.timer_on.stateChanged.connect(self.timer_on_changed)
         self.ui.player_1.currentIndexChanged.connect(self.player_1_changed)
         self.ui.player_2.currentIndexChanged.connect(self.player_2_changed)
-        
+
     def timer_on_changed(self, index):
         self.ui.time_per_move_label.setEnabled(index==QtCore.Qt.Checked)
         self.ui.time_per_move.setEnabled(index==QtCore.Qt.Checked)
-        
+
     def player_1_changed(self, index):
         self.ui.ai_level_1.setEnabled(index>0)
         self.ui.ai_level_label_1.setEnabled(index>0)
-        
+
     def player_2_changed(self, index):
         self.ui.ai_level_2.setEnabled(index>0)
         self.ui.ai_level_label_2.setEnabled(index>0)
@@ -146,11 +146,11 @@ class BoardScene(QtGui.QGraphicsScene):
     selected_hole = -1
     allow_mouse_events = True
     stone_pics = []
-    
+
     hole_clicked = QtCore.pyqtSignal(int, int)
-    
+
     stone_positions = [[0,0]], [[0,]]
-    
+
     def __init__(self, state, width, height, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
         self.state = state.copy()
@@ -159,33 +159,33 @@ class BoardScene(QtGui.QGraphicsScene):
         self.kalahs = [{"item":None, "text":None, "rect":None, "items":[], 'item_coords':[], 'text_rect':None} for x in [0,1]]
         self.holes = [[{"item":None, "text":None, 'rect':None, "items":[], "item_coords":[], 'text_rect':None} for x in range(self.holes_num)] for x in [0,1]]
         self.redraw_geometry = True
-        
+
         self.hole_selected_pen = QtGui.QPen(QtGui.QBrush(QtCore.Qt.blue), 3)
         self.hole_selected_brush = QtGui.QBrush(QtGui.QColor(0,0,255,96))
         self.hole_normal_pen = QtGui.QPen(QtCore.Qt.NoPen) # QtGui.QPen(QtCore.Qt.black)
         self.hole_normal_brush = QtGui.QBrush(QtCore.Qt.NoBrush) # QtGui.QBrush(QtCore.Qt.white)
         self.hole_active_pen =  QtGui.QPen(QtCore.Qt.NoPen) # QtGui.QPen(QtCore.Qt.black)
         self.hole_active_brush = QtGui.QBrush(QtGui.QColor(235,233,237,127))
-        
+
         self.kalah_normal_pen = QtGui.QPen(QtCore.Qt.NoPen) # QtGui.QPen(QtCore.Qt.black)
         self.kalah_normal_brush = QtGui.QBrush(QtCore.Qt.NoBrush) # QtGui.QBrush(QtCore.Qt.white)
         self.kalah_active_pen = QtGui.QPen(QtCore.Qt.NoPen) # QtGui.QPen(QtGui.QBrush(QtCore.Qt.red), 3)
         self.kalah_active_brush = QtGui.QBrush(QtCore.Qt.NoBrush) # QtGui.QBrush(QtGui.QColor(0,0,255,96))
-        
+
         self._load_stone_pics()
         self.draw()
 #        self.setSceneRect(0, 0, width, height)
-        
+
     def _load_stone_pics(self):
         for i in range(1,14):
             self.stone_pics.append(QtGui.QPixmap('images/stone-'+str(i)+'.png'))
-        
+
     def set_state(self, state, redraw=False):
         self.old_state = self.state.copy()
         self.state = state.copy()
         if redraw:
             self.draw()
-    
+
     def _draw_hole(self, player, hole, number, prev_number):
         rect = self.holes[player][hole]['rect']
         if self.holes[player][hole]['items']:
@@ -203,7 +203,7 @@ class BoardScene(QtGui.QGraphicsScene):
         item.setData(1, hole)
         item.setData(2, 0)
         self.holes[player][hole]['items'].append(item)
-                
+
     def _draw_kalah(self, player, number, prev_number):
         if number==prev_number:
             return
@@ -226,7 +226,7 @@ class BoardScene(QtGui.QGraphicsScene):
             item.setData(2, 1)
             item.setOffset(rect.left() + x, rect.top() + y)
             self.kalahs[player]['items'].append(item)
-                
+
     def _set_hole(self, player, hole, number=-1, prev_number=0):
         if number<0:
             number = self.state.player_holes(player)[hole]
@@ -235,7 +235,7 @@ class BoardScene(QtGui.QGraphicsScene):
         self.holes[player][hole]['text'].setText(str(number))
         self.holes[player][hole]['text'].update()
         self._draw_hole(player, hole, number, prev_number)
-        
+
     def _set_kalah(self, player, number=-1, prev_number=0):
         if number<0:
             number = self.state.player_kalah(player)
@@ -244,7 +244,7 @@ class BoardScene(QtGui.QGraphicsScene):
         self.kalahs[player]['text'].setText(str(number))
         self.kalahs[player]['text'].update()
         self._draw_kalah(player, number, prev_number)
-    
+
     def draw(self):
         if self.redraw_geometry:
             self.board_pic = QtGui.QPixmap('images/board.png')
@@ -254,7 +254,7 @@ class BoardScene(QtGui.QGraphicsScene):
             self.width, self.height = g.width(), g.height()
             block_width = block_height = 55
 #            self.block_coords = [[[0,0] for x in range(self.holes_num)] for x in [0,1]]
-            
+
             for player in [0,1]:
                 y = player==0 and 134 or 54
                 y_t = player==0 and 195 or 24
@@ -284,7 +284,7 @@ class BoardScene(QtGui.QGraphicsScene):
                     font.setPixelSize(text_rect.height()*0.6)
                     hole_text.setFont(font)
                     self.holes[player][hole_real_num]['text'] = hole_text
-        
+
                 if player==0:
                     kalah_rect = QtCore.QRectF(480, 66, 38, 110)
                     kalah_rect_1 = QtCore.QRectF(469, 54, 60, 138)
@@ -310,14 +310,14 @@ class BoardScene(QtGui.QGraphicsScene):
                 font.setPixelSize(kalah_text_rect.height()*0.75)
                 kalah_text.setFont(font)
                 self.kalahs[player]['text'] = kalah_text
-                
+
                 self.redraw_geometry = False
-                
+
         for player in [0,1]:
             for hole in range(self.holes_num):
                 self._set_hole(player, hole)
             self._set_kalah(player)
-    
+
     def change_hole_status(self, player, hole, selected=False, activated=False):
         if player<0 or player>1 or hole<0 or hole>=self.holes_num:
             return
@@ -334,7 +334,7 @@ class BoardScene(QtGui.QGraphicsScene):
             hole.setPen(QtGui.QPen(self.hole_normal_pen))
             hole.setBrush(QtGui.QBrush(self.hole_normal_brush))
         hole.update()
-            
+
     def change_kalah_status(self, player, activated=False):
         if player<0 or player>1:
             return
@@ -348,28 +348,28 @@ class BoardScene(QtGui.QGraphicsScene):
             kalah.setPen(self.kalah_normal_pen)
             kalah.setBrush(self.kalah_normal_brush)
         kalah.update()
-            
+
     def select_hole(self, player, hole):
         self.change_hole_status(player, hole, selected=True)
-    
+
     def deselect_hole(self, player, hole):
         self.change_hole_status(player, hole)
-        
+
     def activate_hole(self, player, hole):
         self.change_hole_status(player, hole, activated=True)
-    
+
     def deactivate_hole(self, player, hole):
         self.change_hole_status(player, hole)
-        
+
     def activate_kalah(self, player):
         self.change_kalah_status(player, activated=True)
-    
+
     def deactivate_kalah(self, player):
         self.change_kalah_status(player)
-        
+
     def set_active_player(self, player):
         self.active_player = player
-    
+
     def mousePressEvent(self, event):
 #        QtGui.QGraphicsScene.mousePressEvent(self, event)
         super(BoardScene, self).mousePressEvent(event)
@@ -389,7 +389,7 @@ class BoardScene(QtGui.QGraphicsScene):
                         self.selected_hole = hole
 #                        self.hole_clicked.emit(player, hole)
 #                        self.emit(QtCore.SIGNAL("hole_clicked"), player, hole)
-    
+
     def mouseReleaseEvent(self, event):
         super(BoardScene, self).mousePressEvent(event)
         if event.button()==QtCore.Qt.LeftButton:
@@ -406,45 +406,45 @@ class BoardScene(QtGui.QGraphicsScene):
             if self.selected_hole>=0:
                 self.deselect_hole(self.active_player, self.selected_hole)
                 self.selected_hole = -1
-                
+
     def block_mouse(self):
         self.allow_mouse_events = False
-        
+
     def unblock_mouse(self):
         self.allow_mouse_events = True
 
 class MainWindow(QtGui.QMainWindow):
-    
-    options = {"stones":3, "player_1":"human", "player_2":"human", 
-               "ai_level_1":3, "ai_level_2":3, 
-               "timer_on":False, "time_per_move":60, 
+
+    options = {"stones":5, "player_1":"human", "player_2":"human",
+               "ai_level_1":3, "ai_level_2":3,
+               "timer_on":False, "time_per_move":60,
                "show_moves":False,
                "show_moves_time_interval":0.5}
     ai_methods = {}
     method_path = "methods"
-    
+
     games_history = None
     moves = []
     active_player = 0
     ai_players = [False, False]
     ai_levels = [3, 3]
-    
+
     current_state = None
     board_scene = None
     tasks = []
-    
+
     ai_run_thread = None
     ai_run_object = None
-    
+
 #    board_scene_holes = [[],[]]
 #    board_kalahs = [None, None]
 #    board_selected_hole = -1
-    
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent, QtCore.Qt.WindowFlags(QtCore.Qt.Window + QtCore.Qt.MSWindowsFixedSizeDialogHint))
         self.ui = Ui_kalah_window()
         self.ui.setupUi(self)
-        
+
         self.ui.newgame.clicked.connect(self.new_game)
         self.ui.savegame.clicked.connect(self.save_game)
         self.ui.loadgame.clicked.connect(self.load_game)
@@ -452,24 +452,24 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.history.clicked.connect(self.show_history)
         self.ui.undo.clicked.connect(self.undo_move)
         self.ui.advice.clicked.connect(self.advice)
-        
+
         self.main_timer = QtCore.QTimer(self)
         self.main_timer.timeout.connect(self.update_main_timer)
         self.game_timer = QtCore.QTimer(self)
         self.game_timer.timeout.connect(self.update_game_timer)
-        
+
         self.ui.time_left.hide()
         self.ui.active_player.hide()
         self.ui.board.setUpdatesEnabled(True)
-        
+
 #        self.ai_players[0] = self.options["player_1"]!="human"
 #        self.ai_players[1] = self.options["player_2"]!="human"
         self.load_player_methods()
-        
+
         self.ui.advice.hide()
         self.ui.history.hide()
         self.process_options()
-        
+
     def load_player_methods(self):
         method_files = [ f for f in os.listdir(self.method_path) if isfile(join(self.method_path,f)) and f.endswith('.py') ]
         sys.path.append(join(sys.path[0], self.method_path))
@@ -480,10 +480,10 @@ class MainWindow(QtGui.QMainWindow):
             for name, obj in inspect.getmembers(sys.modules[module_name]):
                 if inspect.isclass(obj) and obj.__bases__ and obj.__bases__[0].__name__=="Method" and not obj._disabled:
                     self.ai_methods[obj.__name__] = {'file':method_file, 'class':obj, 'title':obj._name, 'short_title':obj._short_name, 'module':module_name}
-        
+
     def popup_options_dialog(self):
         dialog = OptionsDlg(self)
-        
+
         dialog.ui.stones.setValue(self.options["stones"])
         obj = {"player_1":dialog.ui.player_1, "player_2":dialog.ui.player_2}
         for key, o in obj.iteritems():
@@ -494,22 +494,22 @@ class MainWindow(QtGui.QMainWindow):
                 if self.options[key]==player:
                     index = o.count()-1
             o.setCurrentIndex(index)
-            
+
         dialog.ui.ai_level_1.setValue(self.options["ai_level_1"])
         dialog.ui.ai_level_1.setEnabled(dialog.ui.player_1.currentIndex()>0)
         dialog.ui.ai_level_label_1.setEnabled(dialog.ui.player_1.currentIndex()>0)
-            
+
         dialog.ui.ai_level_2.setValue(self.options["ai_level_2"])
         dialog.ui.ai_level_2.setEnabled(dialog.ui.player_2.currentIndex()>0)
         dialog.ui.ai_level_label_2.setEnabled(dialog.ui.player_2.currentIndex()>0)
-        
+
         dialog.ui.timer_on.setCheckState(self.options["timer_on"] and QtCore.Qt.Checked or QtCore.Qt.Unchecked)
         dialog.ui.time_per_move_label.setEnabled(self.options["timer_on"])
         dialog.ui.time_per_move.setEnabled(self.options["timer_on"])
         dialog.ui.time_per_move.setValue(self.options['time_per_move'])
-        
+
         dialog.ui.show_moves.setCheckState(self.options["show_moves"] and QtCore.Qt.Checked or QtCore.Qt.Unchecked)
-        
+
         if dialog.exec_():
             self.options["stones"] = dialog.ui.stones.value()
             self.options["player_1"] = dialog.ui.player_1.itemData(dialog.ui.player_1.currentIndex()).toString().__str__()
@@ -523,7 +523,7 @@ class MainWindow(QtGui.QMainWindow):
             return True
 
         return False
-        
+
     def process_options(self):
 #        if self.options["timer_on"]:
 #            self.display_timer()
@@ -540,7 +540,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.ai_players[1] = self.options["player_2"]
             self.ai_levels[1] = self.options["ai_level_2"]
-    
+
     def new_game(self):
         self.active_player = 0
         self.is_animating = False
@@ -565,22 +565,22 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.board_scene.unblock_mouse()
 #        self.main_timer.start(100)
-        
-        
+
+
     def restart_game_timer(self):
         self.game_timer_value = self.options["time_per_move"]
         self.display_timer(self.game_timer_value)
         self.game_timer.start(1000)
-    
+
     def load_game(self):
         pass
-    
+
     def save_game(self):
         pass
-    
+
     def show_history(self):
         pass
-    
+
     def undo_move(self):
         if self.moves:
             move = self.moves.pop()
@@ -588,7 +588,7 @@ class MainWindow(QtGui.QMainWindow):
             self.board_scene.set_active_player(self.active_player)
             self.current_state = move['state']
             self.display_board()
-            
+
             self.move_result = st.MoveEnds
             self.display_active_player()
             if self.ai_players[self.active_player]:
@@ -600,10 +600,10 @@ class MainWindow(QtGui.QMainWindow):
 
             if not self.moves:
                 self.ui.undo.setEnabled(False)
-    
+
     def advice(self):
         pass
-    
+
     def end_game(self):
         if self.on_game:
 #            self.main_timer.stop()
@@ -621,10 +621,10 @@ class MainWindow(QtGui.QMainWindow):
             msg += " Score %d:%d" % (score[0],score[1])
             self.ui.active_player.setText(msg)
             self.display_board()
-            
+
             self.moves = []
             self.ui.undo.setEnabled(False)
-            
+
     def end_game_on_time(self):
         if self.on_game:
             self.game_timer.stop()
@@ -633,10 +633,10 @@ class MainWindow(QtGui.QMainWindow):
             self.board_scene.hole_clicked.disconnect()
             msg = "Time out. Player %d wins!" % (2-self.active_player)
             self.ui.active_player.setText(msg)
-            
+
             self.moves = []
             self.ui.undo.setEnabled(False)
-    
+
     def display_board(self, state=None):
         if not state:
             state = self.current_state
@@ -645,12 +645,12 @@ class MainWindow(QtGui.QMainWindow):
             self.board_scene = BoardScene(state, bg.width(), bg.height())
             self.board_scene.set_active_player(self.active_player)
             self.board_scene.hole_clicked.connect(self.make_move)
-            
+
             self.ui.board.setScene(self.board_scene)
             self.ui.board.fitInView(self.board_scene.sceneRect(), QtCore.Qt.IgnoreAspectRatio)
         else:
             self.board_scene.set_state(state, redraw=True)
-        
+
     def display_active_player(self, player_num=None):
         if not player_num:
             player_num = self.active_player
@@ -661,35 +661,35 @@ class MainWindow(QtGui.QMainWindow):
             msg += ". Wait..."
         self.ui.active_player.show()
         self.ui.active_player.setText(msg)
-        
+
     def display_timer(self, time_left=0):
         self.ui.time_left.setText("Time left: %02d:%02d" % (time_left/60, time_left%60))
-        
+
     def _change_player(self):
         self.active_player = (self.active_player + 1) % 2
         if self.board_scene:
             self.board_scene.set_active_player(self.active_player)
         return self.active_player
-        
+
 #    def make_move_slot(self, player, hole):
 #        if hole<0 or hole>=self.current_state.holes_num() or player!=self.active_player:
 #            return
 #        self.tasks.append({'func':self.make_move, 'param':{'player':player,'hole':hole}})
-                
+
     def make_move(self, player, hole):
         if hole<0 or hole>=self.current_state.holes_num() or player!=self.active_player:
             return
         time.sleep(0.1)
-        
+
         if not self.ai_players[player]:
             self.moves.append({'state':self.current_state.copy(), 'player':self.active_player})
             self.ui.undo.setEnabled(True)
-        
+
         self.move_result = self.current_state.move(player, hole)
         if self.move_result==st.WrongMove:
             QtGui.QMessageBox(QtGui.QMessageBox.Warning, "Warning", "Wrong move. Try another!", QtGui.QMessageBox.Ok, self).exec_()
             return
-            
+
         if self.options["show_moves"] and self.current_state.get_last_moves():
             self.animated_moves = self.current_state.get_last_moves().get_list()
             if self.animated_moves:
@@ -707,7 +707,7 @@ class MainWindow(QtGui.QMainWindow):
                         if move['kalah']:
                             self.board_scene.activate_kalah(move['player'])
                         self.prev_move = move
-        
+
                         self.display_board(move['state'])
 #                        print move['state'].to_string()
                     else:
@@ -715,7 +715,7 @@ class MainWindow(QtGui.QMainWindow):
                         self.end_animation()
                         self.display_board()
                         self.move_finished()
-                        
+
                 self.prev_move = None
                 self.animated_timer = QtCore.QTimer()
                 self.animated_timer.timeout.connect(animate_move)
@@ -726,7 +726,7 @@ class MainWindow(QtGui.QMainWindow):
         if not self.is_animating:
             self.display_board()
             self.move_finished()
-            
+
     def move_finished(self):
         if self.move_result!=st.MoveEndsInPlayersKalah:
             self._change_player()
@@ -740,12 +740,12 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.board_scene.unblock_mouse()
             self.restart_game_timer()
-        
+
     def update_main_timer(self):
         if self.tasks:
             task = self.tasks.pop(0)
             self.process_task(task)
-            
+
     def update_game_timer(self):
         if self.is_animating:
             return
@@ -753,23 +753,23 @@ class MainWindow(QtGui.QMainWindow):
         self.display_timer(self.game_timer_value)
         if self.game_timer_value==0:
             self.end_game_on_time()
-    
+
     def process_task(self, task):
         if task['func']:
             task['func'](task['param'])
-            
+
     def begin_animation(self):
         self.is_animating = True
         self.ui.undo.setEnabled(False)
         if self.board_scene:
             self.board_scene.block_mouse()
-            
+
     def end_animation(self):
         self.is_animating = False
         self.ui.undo.setEnabled(True)
         if self.board_scene:
             self.board_scene.unblock_mouse()
-            
+
     def ai_moves(self):
         ai_player = self.ai_players[self.active_player]
         obj = self.ai_methods[ai_player]['class'](self.active_player, self.ai_levels[self.active_player])
@@ -789,17 +789,17 @@ class MainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ai_run_object, QtCore.SIGNAL("success"), self.process_ai_move)
         self.ai_run_object.moveToThread(self.ai_run_thread)
         self.ai_run_thread.start()
-        
+
     def process_ai_move(self, hole):
         self.ai_run_thread.wait()
         del self.ai_run_thread
         self.ai_run_thread = None
         del self.ai_run_object
         self.ai_run_object = None
-        
+
         if self.on_game:
             self.make_move(self.active_player, hole)
-        
+
 if __name__ == "__main__":
     sys.path.append(join(sys.path[0], 'methods'))
     app = QtGui.QApplication(sys.argv)

@@ -15,7 +15,7 @@ from PyQt4 import QtCore, QtGui
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-VERSION = 5
+VERSION = 8
 class AsyncRunProcess(Process):
     """Class that implements methods running in a separate process"""
     def __init__(self, obj, state, conn):
@@ -368,7 +368,7 @@ class MainWindow(QtGui.QMainWindow):
             "player_1":"Version"+str(VERSION)+"Method",
             "player_2":"Version"+str(VERSION-1)+"Method",
                "ai_level_1":3, "ai_level_2":3,
-               "timer_on":False, "time_per_move":60,
+               "timer_on":False, "time_per_move":99,
                "show_moves":False,
                "show_moves_time_interval":0.5}
     ai_methods = {}

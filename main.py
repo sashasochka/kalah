@@ -15,7 +15,7 @@ from PyQt4 import QtCore, QtGui
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-VERSION = 2
+VERSION = 5
 class AsyncRunProcess(Process):
     """Class that implements methods running in a separate process"""
     def __init__(self, obj, state, conn):

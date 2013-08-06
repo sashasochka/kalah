@@ -6,4 +6,6 @@ newfile="Version${newver}.py"
 cp $oldfile $newfile -i
 
 sed -i "s/Version$oldver/Version$newver/g" $newfile
+chmod +x $newfile
 $EDITOR $newfile
+

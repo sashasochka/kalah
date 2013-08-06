@@ -15,6 +15,7 @@ from PyQt4 import QtCore, QtGui
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+VERSION = 2
 class AsyncRunProcess(Process):
     """Class that implements methods running in a separate process"""
     def __init__(self, obj, state, conn):
@@ -363,7 +364,9 @@ class BoardScene(QtGui.QGraphicsScene):
 
 class MainWindow(QtGui.QMainWindow):
 
-    options = {"stones":5, "player_1":"Version0Method", "player_2":"Version1Method",
+    options = {"stones":5,
+            "player_1":"Version"+str(VERSION)+"Method",
+            "player_2":"Version"+str(VERSION-1)+"Method",
                "ai_level_1":3, "ai_level_2":3,
                "timer_on":False, "time_per_move":60,
                "show_moves":False,

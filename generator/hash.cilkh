@@ -1,0 +1,123 @@
+// Kalah knowledge hash class header file
+// Geoffrey Irving
+// 4sep0
+
+#ifndef __HASH_H
+#define __HASH_H
+
+#include "elision.h"
+#ifdef CILK
+#include <cilk.h>
+#include <cilk-lib.h>
+#endif
+
+#include <stdlib.h>
+#include <stdio.h> 
+#include <string.h>
+#include "params.h"
+#include "rules.h"
+
+#define HASH_32 32
+#define HASH_64 64
+#define ZOBRIST 2
+#define LOCKBITS 10
+#define LOCKSIZE (1<<LOCKBITS)
+#define LOCKMASK (LOCKSIZE-1)
+
+/* Optional parameters */
+#define LOWDEPTH 3
+#define HASH 32
+#define LOCKING
+
+#ifndef CILK
+#undef LOCKING
+#endif
+
+#include "mix.h"
+
+#define hashsize(n) (1L<<(n))
+#define hashmask(n) (hashsize(n)-1)
+
+typedef struct __datum {
+  ub8 b;
+  signed char r; 
+  unsigned char d,m,f;
+  } datum;
+
+// Datum flags
+#define D_TYPE 3
+#define DV_INVALID 0
+#define DV_LO 1
+#define DV_HI 2
+#define DV_EXACT 3
+#define D_STALE 4 
+
+typedef struct __datumaccess {
+  datum *c;
+#ifdef LOCKING
+  Cilk_lockvar *l;
+#endif
+  ub8 b;
+  unsigned char ko,t,d,m;
+  signed char br, r;
+  } datumaccess;
+
+extern void da_seta(datumaccess *da, int d, int m, int r, int t);
+static inline void da_verify(datumaccess *d);
+
+
+struct hash {
+  int bits;        // logarithmic size of hash table 
+  size_t size;     // size of hash table (2^bits)
+  size_t entries;  // number of entries 
+  size_t mask;     // hash mask (size-1)
+#ifdef LOCKING
+  Cilk_lockvar l[LOCKSIZE];
+#endif
+  datum *d;        // hash table 
+  };
+
+struct hash_header {
+  char sig[2];
+  int bits;
+  size_t size;
+  size_t entries;
+  };
+
+extern struct hash ha;
+
+extern void create_hash(int bitsize);
+extern void read_hash(FILE *f);
+extern void write_hash(FILE *f);
+extern void free_hash();
+
+extern void setstale();
+extern void ha_lookup(datumaccess *da, position *p);
+
+
+/* inline code */
+
+static inline void da_verify(datumaccess *d) {
+  int t;
+  if (d->ko) return;
+#ifdef LOCKING
+  Cilk_lock(*d->l);
+#endif
+  t = d->c->f;
+  if (t && d->c->b == d->b) {
+    d->t = t & D_TYPE;
+    d->c->f = d->t;
+    d->r = d->br + d->c->r;
+    d->d = d->c->d;
+    d->m = d->c->m;
+    }
+  else
+    d->t = 0;
+#ifdef LOCKING
+  Cilk_unlock(*d->l);
+#endif
+  }
+
+#endif
+
+

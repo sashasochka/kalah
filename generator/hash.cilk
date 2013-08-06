@@ -1,0 +1,154 @@
+// Kalah transposition table hash code
+// Geoffrey Irving
+// 4sep0
+
+// Hash function written by Bob Jenkins
+
+#include "hash.cilkh"
+#define __hash_lowlevel
+#include "mix.h"
+
+char ha_sig[] = "ha";
+
+struct hash ha;
+
+void create_hash(int bitsize) {
+  int i;
+  ha.bits = bitsize;
+  ha.size = hashsize(ha.bits);
+  ha.mask = hashmask(ha.bits);
+  ha.entries = 0;
+  ha.d = (datum*) malloc(ha.size * sizeof(datum));
+  for (i=0;i<ha.size;i++)
+    ha.d[i].f = 0;
+#ifdef LOCKING
+  for (i=0;i<LOCKSIZE;i++)
+    Cilk_lock_init(ha.l[i]);
+#endif
+  }
+
+void read_hash(FILE *f) {
+#ifdef LOCKING
+  int i;
+#endif
+  struct hash_header hh;
+  fread(&hh,sizeof(struct hash_header),1,f);
+  if (memcmp(hh.sig,ha_sig,2)) {
+    fprintf(stderr,"Corrupt hash file\n");
+    exit(-1);
+    }
+
+  ha.bits = hh.bits;
+  ha.size = hh.size;
+  ha.entries = hh.entries;
+  ha.mask = hh.size - 1;
+
+  ha.d = malloc(ha.size * sizeof(datum));
+  if (fread(ha.d,sizeof(datum),ha.size,f) != ha.size)
+    exit(-1);
+
+#ifdef LOCKING
+  for (i=0;i<LOCKSIZE;i++)
+    Cilk_lock_init(ha.l[i]);
+#endif
+  }
+
+void write_hash(FILE *f) {
+  struct hash_header hh;
+  memcpy(hh.sig,ha_sig,2);
+  hh.bits = ha.bits;
+  hh.size = ha.size;
+  hh.entries = ha.entries;
+  fwrite(&hh,sizeof(struct hash_header),1,f);
+  fwrite(ha.d,sizeof(datum),ha.size,f);
+  }
+
+void free_hash() {
+  free(ha.d);
+  }
+
+extern void setstale() {
+  register datum *p, *e;
+  e = ha.d + ha.size;
+  for (p=ha.d;p<e;p++)
+    if (p->f)
+      p->f |= D_STALE; 
+  }
+
+void ha_lookup(datumaccess *da, position *p) {
+  ub4 k;
+#if HASH == 64 || HASH == ZOBRIST
+  register ub8 b;
+  if (p->s)
+    b = packpits(p->a) | ((ub8)packpits(p->a+PITS+1) << 32); 
+  else 
+    b = packpits(p->a+PITS+1) | ((ub8)packpits(p->a) << 32); 
+
+  if (b & HASHOVERFLOW64) {
+    da->ko = 1;
+    da->t = DV_INVALID;
+    return;
+    }
+
+  da->b = b;
+#if HASH == 64
+  k = mix64(b);
+#else
+  k = zobrist(*p);
+#endif
+#elif HASH == 32
+  register ub4 a,b;
+  if (p->s) {
+    a = packpits(p->a);
+    b = packpits(p->a+PITS+1);
+    }
+  else {
+    b = packpits(p->a);
+    a = packpits(p->a+PITS+1);
+    }
+  
+  if (a == HASHOVERFLOW || b == HASHOVERFLOW) {
+    da->ko = 1;
+    da->t = DV_INVALID;
+    return;
+    }
+
+  set_ub8(da->b,a,b);
+  k = mix32(a,b);
+#endif
+
+  da->c = ha.d + (k & ha.mask); 
+#ifdef LOCKING
+  da->l = ha.l + (k & LOCKMASK);
+#endif
+  da->br = rate(*p);
+  da->ko = 0;
+  da_verify(da);
+  }
+
+void da_seta(datumaccess *da, int d, int m, int r, int t) {
+  if (da->ko) return;
+#ifdef LOCKING
+  Cilk_lock(*da->l);
+#endif
+  if (da->c->b == da->b) {
+    da->c->d = d;
+    da->c->m = m;
+    da->c->r = r - da->br;
+    da->c->f = t;
+    if (!da->t)
+      da->c->b = da->b;
+    }
+  else if ((da->c->f & D_STALE) || da->c->d <= d) {
+    da->c->d = d; 
+    da->c->m = m; 
+    da->c->r = r - da->br;
+    da->c->f = t;
+    da->c->b = da->b;
+    }
+#ifdef LOCKING
+  Cilk_unlock(*da->l);
+#endif
+  }
+
+

@@ -365,12 +365,14 @@ class BoardScene(QtGui.QGraphicsScene):
 class MainWindow(QtGui.QMainWindow):
 
     options = {"stones":5,
-            "player_1":"Version"+str(VERSION)+"Method",
-            "player_2":"Version"+str(VERSION-1)+"Method",
+            #"player_1":"Version"+str(VERSION)+"Method",
+            #"player_2":"Version"+str(VERSION-1)+"Method",
+            "player_1":"human",
+            "player_2":"Version"+str(VERSION)+"Method",
                "ai_level_1":3, "ai_level_2":3,
-               "timer_on":False, "time_per_move":99,
+               "timer_on":True, "time_per_move":60,
                "show_moves":False,
-               "show_moves_time_interval":0.5}
+               "show_moves_time_interval":0.1}
     ai_methods = {}
     method_path = "methods"
 

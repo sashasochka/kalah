@@ -1295,7 +1295,7 @@ class CleverBotMethod(Method):
         return  best_state
 
     def _test_timeout(self):
-        allowed_time = 60
+        allowed_time = 5
         allowed_without_risk = allowed_time * 0.9
         if time() - self._start_time > allowed_without_risk:
             print('No more time...')

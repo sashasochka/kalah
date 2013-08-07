@@ -1187,12 +1187,12 @@ precomputed = lambda state: {
 ,((7,4,2,0,0,3),(0,2,4,2,6,27)):1
 }.get(state, None)
 
-class Version11Method(Method):
-    _name = "Version11"
-    _short_name = "Version11"
+class CleverBotMethod(Method):
+    _name = "CleverBot"
+    _short_name = "CleverBot"
 
     def __init__(self, player_num, ai_level=4):
-        super(Version11Method, self).__init__(player_num, ai_level)
+        super(CleverBotMethod, self).__init__(player_num, ai_level)
         self.set_level(ai_level)
 
     def set_level(self, ai_level):
@@ -1309,6 +1309,6 @@ if __name__ == "__main__":
     all_holes = map(int, sys.argv[1:])
     assert(len(all_holes) == 12)
     state._holes = [all_holes[:6], all_holes[6:]]
-    method = Version11Method(1, 3)
+    method = CleverBotMethod(1, 3)
     print(method.make_move(state))
 

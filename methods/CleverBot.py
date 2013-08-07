@@ -1255,7 +1255,6 @@ class CleverBotMethod(Method):
         my_state = tuple(state.player_holes(self._player))
         opp_state = tuple(state.player_holes(self._other_player()))
         state_tup = (my_state, opp_state)
-
         # Try precomputed value
         precomp = precomputed(state_tup)
         if precomp is not None:
@@ -1304,11 +1303,11 @@ class CleverBotMethod(Method):
 
 if __name__ == "__main__":
     from state import KalahState
-    state = KalahState(0)
+    state = KalahState(6)
     state._kalahs = [0, 0]
     all_holes = map(int, sys.argv[1:])
     assert(len(all_holes) == 12)
-    state._holes = [all_holes[:6], all_holes[6:]]
+    state._holes = [all_holes[6:], all_holes[:6]]
     method = CleverBotMethod(1, 3)
     print(method.make_move(state))
 

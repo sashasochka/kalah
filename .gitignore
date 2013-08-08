@@ -218,3 +218,11 @@ logs
 !logs/showlog
 exp*
 *.txt
+
+generator/classify
+generator/generator
+generator/grep
+generator/head
+generator/kalah-s
+generator/twiddle
+

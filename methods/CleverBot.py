@@ -1642,12 +1642,12 @@ class CleverBotMethod(Method):
             print('Using precomputed move')
             return precomp
 
-        # Log data
-        # TODO: remove in the final version.
-        # Oleksiy, if I forget to remove it please remove it now
-        with open('exp_data.txt', 'a') as logfile:
-            logfile.write(str(state_tup))
-            logfile.write('\n')
+        #  # Log data
+        #  # TODO: remove in the final version.
+        #  # Oleksiy, if I forget to remove it please remove it now
+        #  with open('exp_data.txt', 'a') as logfile:
+        #      logfile.write(str(state_tup))
+        #      logfile.write('\n')
 
         # Minimax algorithm
         best_state = None

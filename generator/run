@@ -5,11 +5,10 @@ import sys
 
 for line in sys.stdin.readlines():
     stones = line.split()
-    cmd = ('./kalah-s -t 20 -e 18 -d 13 -g p ' +
+    cmd = ('./kalah-s -t 20 -e 18 -d 13 p ' +
         ' '.join(stones[:6]) + ' 0 ' +
         ' '.join(stones[6:]) + ' 0 | ' +
         r'''sed -e 's/Move.\+m \([0-9]\).\+$/\1/' | \
-        grep -v [a-z] | \
-        head -n -1 ''')
+        grep -v [a-z] ''')
     system(cmd)
 
